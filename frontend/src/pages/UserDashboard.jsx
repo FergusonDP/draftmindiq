@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSettings } from "../app/SettingsContext.jsx";
-import "./dashboard.css";
+import "./Dashboard.css";
 import "./userDashboard.css";
 
 const SPORTS = [
