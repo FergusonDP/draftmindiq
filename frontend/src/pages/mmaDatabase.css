@@ -1,0 +1,431 @@
+.mmaDbPage {
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.mmaDbHeader {
+  margin-bottom: 18px;
+}
+
+.mmaEyebrow {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8fb4ff;
+}
+
+.mmaMainTitle {
+  margin: 4px 0 8px;
+  font-size: 30px;
+  font-weight: 1000;
+  line-height: 1.02;
+}
+
+.mmaSubTitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.mmaGlobalError {
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 100, 100, 0.28);
+  background: rgba(255, 0, 0, 0.08);
+  padding: 12px 14px;
+}
+
+.mmaDbLayout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.mmaSidebar {
+  min-width: 0;
+}
+
+.mmaContent {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.mmaSidebarCard,
+.mmaHeroCard,
+.mmaPanelCard {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.mmaSidebarCard,
+.mmaPanelCard {
+  padding: 14px;
+}
+
+.mmaHeroCard {
+  padding: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 30%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.mmaSidebarTitle,
+.mmaSectionTitle {
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.mmaSearch {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  padding: 0 12px;
+  outline: none;
+}
+
+.mmaSearch:focus {
+  border-color: rgba(79, 70, 229, 0.7);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+
+.mmaSidebarMeta {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mmaFighterList {
+  max-height: 72vh;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.mmaFighterListItem {
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.mmaFighterListItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mmaFighterListItem.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.mmaFighterListName {
+  font-weight: 800;
+}
+
+.mmaHeroTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.mmaHeroName {
+  font-size: 32px;
+  font-weight: 1000;
+  line-height: 1.02;
+}
+
+.mmaHeroNick {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.mmaHeroRecordBlock {
+  min-width: 140px;
+  text-align: right;
+}
+
+.mmaRecordLabel {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.mmaRecordValue {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 1000;
+}
+
+.mmaBioGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mmaBioStat,
+.mmaMiniStat {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.mmaBioStat span,
+.mmaMiniStat span {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.mmaBioStat strong,
+.mmaMiniStat strong {
+  font-size: 18px;
+  font-weight: 1000;
+  color: white;
+}
+
+.mmaInfoGrid,
+.mmaTwoUp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.mmaStatGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mmaInfoList {
+  display: grid;
+  gap: 2px;
+}
+
+.mmaLineRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mmaLineRow:last-child {
+  border-bottom: none;
+}
+
+.mmaStrong {
+  font-weight: 800;
+}
+
+.mmaMuted {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.mmaSmall {
+  font-size: 12px;
+}
+
+.mmaRight {
+  margin-left: auto;
+}
+
+.mmaFightLog {
+  display: grid;
+  gap: 8px;
+}
+
+.mmaFightRow {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 0;
+  text-align: left;
+  color: white;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.mmaFightRow:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mmaChip {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.mmaChipWin {
+  border-color: rgba(120, 255, 160, 0.45);
+}
+
+.mmaChipLoss {
+  border-color: rgba(255, 120, 120, 0.45);
+}
+
+.mmaTableWrap {
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.mmaTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.mmaTable th,
+.mmaTable td {
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mmaTableHint {
+  margin-top: 10px;
+}
+
+.mmaBtn {
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.mmaBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mmaModalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px;
+  z-index: 9999;
+}
+
+.mmaModal {
+  width: min(1120px, 96vw);
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+}
+
+.mmaModalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mmaModalEyebrow {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8fb4ff;
+}
+
+.mmaModalTitle {
+  font-size: 18px;
+  font-weight: 1000;
+  margin-top: 4px;
+}
+
+.mmaModalUrl {
+  margin-bottom: 12px;
+}
+
+.mmaBreak {
+  word-break: break-all;
+}
+
+.mmaRoundBlock {
+  margin-top: 12px;
+}
+
+.mmaRoundTitle {
+  font-size: 13px;
+  font-weight: 900;
+  margin: 8px 0;
+}
+
+.mmaErrorCard {
+  border-color: rgba(255, 100, 100, 0.28);
+  background: rgba(255, 0, 0, 0.08);
+}
+
+@media (max-width: 1100px) {
+  .mmaDbLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .mmaBioGrid,
+  .mmaInfoGrid,
+  .mmaTwoUp {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .mmaBioGrid,
+  .mmaStatGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .mmaHeroTop {
+    flex-direction: column;
+  }
+
+  .mmaHeroRecordBlock {
+    text-align: left;
+  }
+}
