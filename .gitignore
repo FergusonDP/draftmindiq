@@ -10,3 +10,5 @@ backend/data/*.sqlite-shm
 backend/data/*.sqlite-wal
 backend/data/*.db
 backend/data/marts/
+
+!backend/data/mma_fighter_cards.sqlite
