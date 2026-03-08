@@ -1,0 +1,98 @@
+export const DAILY_SLATE_NOTES = {
+  MMA: {
+    slate: "UFC Fight Night",
+    status: "Active",
+    summary: "Balanced build environment with several live underdogs and multiple strong finish paths near the top.",
+    angles: [
+      "Underdog salary relief is viable",
+      "Prioritize finish equity over pure volume",
+      "Late line movement matters more than usual",
+    ],
+    updatedAt: "Updated 11:45 AM",
+    to: "/optimizer/mma",
+  },
+  NFL: {
+    slate: "Sunday Main Slate",
+    status: "Upcoming",
+    summary: "Injury reporting and late-week practice participation should shape the first build pool.",
+    angles: [
+      "Watch final injury designations",
+      "Game stacks still drive ceiling",
+      "Value may open late",
+    ],
+    updatedAt: "Updated 10:10 AM",
+    to: "/optimizer/nfl",
+  },
+  NBA: {
+    slate: "Tonight's Main Slate",
+    status: "Watch",
+    summary: "This slate will likely swing on starting lineup news and late usage changes.",
+    angles: [
+      "Monitor confirmed starters",
+      "Usage spikes matter more than season averages",
+      "Leave room for late swaps",
+    ],
+    updatedAt: "Updated 12:05 PM",
+    to: "/optimizer/nba",
+  },
+  MLB: {
+    slate: "Evening Slate",
+    status: "Watch",
+    summary: "Weather and stack concentration should define the strongest roster builds.",
+    angles: [
+      "Check weather before lock",
+      "Identify chalk stack clusters",
+      "Pitching spend will shape roster flexibility",
+    ],
+    updatedAt: "Updated 9:30 AM",
+    to: "/optimizer/mlb",
+  },
+  NHL: {
+    slate: "Tonight's Slate",
+    status: "Upcoming",
+    summary: "Correlation and goalie selection should remain the core decision points.",
+    angles: [
+      "Prioritize full line correlation",
+      "Goalie win equity matters",
+      "Watch beat reports for line changes",
+    ],
+    updatedAt: "Updated 8:55 AM",
+    to: "/optimizer/nhl",
+  },
+  CFB: {
+    slate: "College Main Slate",
+    status: "Upcoming",
+    summary: "Game environments and pricing gaps should drive early slate construction.",
+    angles: [
+      "Target high-total spots",
+      "Find underpriced volume roles",
+      "Ownership leverage can be strong",
+    ],
+    updatedAt: "Updated 9:05 AM",
+    to: "/optimizer/cfb",
+  },
+  PGA: {
+    slate: "Tournament Build",
+    status: "Field Watch",
+    summary: "Course fit and recent form should drive the first pass through builds.",
+    angles: [
+      "Weight course fit",
+      "Balance win equity and cut equity",
+      "Ownership spreads out naturally",
+    ],
+    updatedAt: "Updated 7:40 AM",
+    to: "/optimizer/pga",
+  },
+  SOCCER: {
+    slate: "Matchday Slate",
+    status: "Upcoming",
+    summary: "Set-piece roles and team-total context should guide early decisions.",
+    angles: [
+      "Prioritize set-piece floors",
+      "Watch starting elevens",
+      "Correlate with favorites selectively",
+    ],
+    updatedAt: "Updated 10:25 AM",
+    to: "/optimizer/soccer",
+  },
+};

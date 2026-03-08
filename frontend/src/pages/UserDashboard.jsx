@@ -1,73 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSettings } from "../app/SettingsContext.jsx";
+import { DAILY_SLATE_NOTES } from "../data/dailySlateNotes.js";
 import "./Dashboard.css";
 import "./userDashboard.css";
 
-const SPORTS = [
-  { key: "ALL", label: "All Sports" },
-  { key: "MMA", label: "MMA" },
-  { key: "NFL", label: "NFL" },
-  { key: "NBA", label: "NBA" },
-  { key: "MLB", label: "MLB" },
-  { key: "NHL", label: "NHL" },
-];
+const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
 
-const SPORT_KEYS = ["MMA", "NFL", "NBA", "MLB", "NHL"];
-
-const USER_MODULES = [
-  {
-    key: "MMA",
-    status: "LIVE",
-    title: "MMA Optimizer",
-    desc: "Build lineups, review projections, and export with confidence.",
-    to: "/optimizer/mma",
-    highlights: ["Player pool controls", "Fight-level context", "CSV export ready"],
-    tone: "good",
-  },
-  {
-    key: "NFL",
-    status: "NEXT",
-    title: "NFL Hub",
-    desc: "Projections, contests, and optimizer workflow are coming next.",
-    to: "/optimizer/nfl",
-    highlights: ["Slate flow planned", "Projection layer upcoming", "UI route ready"],
-    tone: "warn",
-  },
-  {
-    key: "NBA",
-    status: "SOON",
-    title: "NBA Hub",
-    desc: "Late news and usage-aware optimizer workflow will live here.",
-    to: "/optimizer/nba",
-    highlights: ["Placeholder module", "Late news hooks", "Frontend ready"],
-    tone: "neutral",
-  },
-  {
-    key: "MLB",
-    status: "SOON",
-    title: "MLB Hub",
-    desc: "Stacks, weather, leverage, and slate tools are planned.",
-    to: "/optimizer/mlb",
-    highlights: ["Placeholder module", "Data model TBD", "Frontend ready"],
-    tone: "neutral",
-  },
-  {
-    key: "NHL",
-    status: "SOON",
-    title: "NHL Hub",
-    desc: "Lines, goalies, and correlations will live here later.",
-    to: "/optimizer/nhl",
-    highlights: ["Placeholder module", "Data model TBD", "Frontend ready"],
-    tone: "neutral",
-  },
-];
-
-const QUICK_ACTIONS = [
-  { title: "Open Optimizer", desc: "Jump into the active optimizer workflow.", to: "/optimizer/mma" },
-  { title: "Saved Builds", desc: "Review your latest lineups and drafts.", to: "/optimizer/mma" },
-  { title: "Exports", desc: "Check your recent CSV-ready outputs.", to: "/optimizer/mma" },
-];
+const MAIN_SPORTS = ["MMA", "NFL", "NBA", "MLB", "NHL"];
+const MORE_SPORTS = ["CFB", "PGA", "SOCCER"];
+const HERO_VIDEO_SPORTS = ["MMA", "NFL", "NBA", "MLB", "NHL"];
+const NEWS_SPORTS = ["MMA", "NFL", "NBA", "MLB", "NHL"];
 
 function safeJson(x) {
   return x && typeof x === "object" ? x : null;
@@ -101,20 +44,38 @@ function getStoredUser() {
   }
 }
 
+function getVideoThumb(item) {
+  return (
+    item?.thumbnail ||
+    item?.thumbnail_url ||
+    item?.image ||
+    item?.image_url ||
+    item?.thumb ||
+    ""
+  );
+}
+
+function getVideoMeta(item) {
+  const source = item?.source || "Video";
+  const published = formatPublished(item?.published_at);
+  return published ? `${source} • ${published}` : source;
+}
+
 export default function UserDashboard() {
   const { settings } = useSettings();
   const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
   const user = getStoredUser();
 
-  const [sport, setSport] = useState(settings.favoriteSport || "ALL");
   const [tick, setTick] = useState(Date.now());
-
   const [news, setNews] = useState({ ok: false, items: [], count: 0 });
-  const [videos, setVideos] = useState({ ok: false, items: [], count: 0 });
-  const [contentLoading, setContentLoading] = useState(false);
-  const [videoOffset, setVideoOffset] = useState(0);
+  const [newsLoading, setNewsLoading] = useState(false);
 
-  const shouldCycle = sport === "ALL";
+  const [heroVideos, setHeroVideos] = useState([]);
+  const [heroVideosLoading, setHeroVideosLoading] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTick(Date.now()), 1000);
@@ -122,10 +83,15 @@ export default function UserDashboard() {
   }, []);
 
   useEffect(() => {
-    if (settings.favoriteSport && settings.favoriteSport !== sport) {
-      setSport(settings.favoriteSport);
+    function onDocClick(e) {
+      if (!moreRef.current?.contains(e.target)) {
+        setMoreOpen(false);
+      }
     }
-  }, [settings.favoriteSport, sport]);
+
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
 
   const clockLabel = useMemo(() => {
     return new Date(tick).toLocaleTimeString("en-US", {
@@ -145,133 +111,151 @@ export default function UserDashboard() {
     });
   }, [tick, settings.timezone]);
 
-  const visibleModules = useMemo(() => {
-    if (sport === "ALL") return USER_MODULES;
-    return USER_MODULES.filter((m) => m.key === sport);
-  }, [sport]);
-
   const firstName = useMemo(() => {
     const raw = String(user?.name || user?.username || "Player").trim();
     return raw.split(" ")[0] || "Player";
   }, [user]);
 
-  const pulse = useMemo(() => {
-    return [
-      { label: "Selected Sport", value: sport, hint: shouldCycle ? "all sports view" : "single sport view", tone: "good" },
-      { label: "Optimizer", value: "READY", hint: "core workflow available", tone: "good" },
-      { label: "News Feed", value: contentLoading ? "LOADING" : "LIVE", hint: "latest platform content", tone: "neutral" },
-      { label: "Exports", value: "READY", hint: "csv workflow available", tone: "neutral" },
-    ];
-  }, [sport, shouldCycle, contentLoading]);
+  const sportCards = useMemo(() => {
+    return Object.entries(DAILY_SLATE_NOTES).map(([key, value]) => ({
+      key,
+      ...value,
+    }));
+  }, []);
 
   useEffect(() => {
     let alive = true;
 
-    async function fetchNewsFor(key) {
-      const res = await fetch(`${API_BASE}/news/${key}?limit=10`);
-      const j = safeJson(await res.json());
-      if (!j || !j.ok) return [];
-      return (j.items || []).map((it) => ({ ...it, sport: key }));
-    }
-
-    async function fetchVideosFor(key) {
-      const res = await fetch(`${API_BASE}/video/${key}?limit=8`);
-      const j = safeJson(await res.json());
-      if (!j || !j.ok) return [];
-      return (j.items || []).map((it) => ({ ...it, sport: key }));
-    }
-
-    async function load() {
-      setContentLoading(true);
+    async function loadNews() {
+      setNewsLoading(true);
       try {
-        if ((sport || "ALL").toUpperCase() === "ALL") {
-          const [newsLists, videoLists] = await Promise.all([
-            Promise.all(SPORT_KEYS.map((k) => fetchNewsFor(k))),
-            Promise.all(SPORT_KEYS.map((k) => fetchVideosFor(k))),
-          ]);
-
-          if (!alive) return;
-
-          const mergedNews = newsLists.flat().sort((a, b) => parseTime(b.published_at) - parseTime(a.published_at));
-          const mergedVideos = videoLists.flat();
-
-          setNews({ ok: true, items: mergedNews.slice(0, 10), count: mergedNews.length });
-          setVideos({ ok: true, items: mergedVideos.slice(0, 12), count: mergedVideos.length });
-          setVideoOffset(0);
-          return;
-        }
-
-        const sportKey = (sport || "MMA").toUpperCase();
-        const [nRes, vRes] = await Promise.all([
-          fetch(`${API_BASE}/news/${sportKey}?limit=10`),
-          fetch(`${API_BASE}/video/${sportKey}?limit=12`),
-        ]);
-
-        const nJson = safeJson(await nRes.json());
-        const vJson = safeJson(await vRes.json());
+        const all = await Promise.all(
+          NEWS_SPORTS.map(async (key) => {
+            const res = await fetch(`${API_BASE}/news/${key}?limit=6`);
+            const j = safeJson(await res.json());
+            if (!j || !j.ok) return [];
+            return (j.items || []).map((it) => ({ ...it, sport: key }));
+          })
+        );
 
         if (!alive) return;
 
-        setNews(nJson && nJson.ok ? nJson : { ok: false, items: [], count: 0 });
-        setVideos(vJson && vJson.ok ? vJson : { ok: false, items: [], count: 0 });
-        setVideoOffset(0);
+        const merged = all
+          .flat()
+          .sort((a, b) => parseTime(b.published_at) - parseTime(a.published_at));
+
+        const seen = new Set();
+        const deduped = merged.filter((item) => {
+          const dedupeKey = item.url || `${item.sport}-${item.title}`;
+          if (seen.has(dedupeKey)) return false;
+          seen.add(dedupeKey);
+          return true;
+        });
+
+        setNews({
+          ok: true,
+          items: deduped.slice(0, 8),
+          count: deduped.length,
+        });
       } catch {
         if (!alive) return;
         setNews({ ok: false, items: [], count: 0 });
-        setVideos({ ok: false, items: [], count: 0 });
       } finally {
-        if (alive) setContentLoading(false);
+        if (alive) setNewsLoading(false);
       }
     }
 
-    load();
+    async function loadHeroVideos() {
+      setHeroVideosLoading(true);
+      try {
+        const all = await Promise.all(
+          HERO_VIDEO_SPORTS.map(async (key) => {
+            const res = await fetch(`${API_BASE}/video/${key}?limit=4`);
+            const j = safeJson(await res.json());
+            if (!j || !j.ok) return [];
+            return (j.items || [])
+              .map((it) => ({ ...it, sport: key }))
+              .sort((a, b) => parseTime(b.published_at) - parseTime(a.published_at));
+          })
+        );
+
+        if (!alive) return;
+
+        const buckets = all.map((items) => [...items]);
+        const mixed = [];
+
+        let added = true;
+        while (added) {
+          added = false;
+          for (const bucket of buckets) {
+            if (bucket.length) {
+              mixed.push(bucket.shift());
+              added = true;
+            }
+          }
+        }
+
+        setHeroVideos(mixed);
+        setHeroIndex(0);
+      } catch {
+        if (!alive) return;
+        setHeroVideos([]);
+      } finally {
+        if (alive) setHeroVideosLoading(false);
+      }
+    }
+
+    loadNews();
+    loadHeroVideos();
+
     return () => {
       alive = false;
     };
-  }, [API_BASE, sport]);
+  }, [API_BASE]);
 
   useEffect(() => {
-    if (!shouldCycle) return;
-    const t = setInterval(() => setVideoOffset((x) => x + 1), 8000);
+    if (!heroVideos.length) return;
+    const t = setInterval(() => {
+      setHeroIndex((x) => (x + 1) % heroVideos.length);
+    }, 8000);
     return () => clearInterval(t);
-  }, [shouldCycle]);
+  }, [heroVideos]);
 
-  const railHint = useMemo(() => {
-    const base = sport === "ALL" ? "Mixed headlines + rotating videos" : `${sport} headlines + videos`;
-    return contentLoading ? `${base} • loading…` : base;
-  }, [sport, contentLoading]);
+  const heroCount = heroVideos.length;
 
-  const cycledVideos = useMemo(() => {
-    const items = videos?.items || [];
-    if (!items.length) return [];
-    const take = 4;
-    const start = (videoOffset || 0) % items.length;
-    const out = [];
+  function goPrevHero(e) {
+    e.preventDefault();
+    if (!heroCount) return;
+    setHeroIndex((x) => (x - 1 + heroCount) % heroCount);
+  }
 
-    for (let i = 0; i < Math.min(take, items.length); i++) {
-      out.push(items[(start + i) % items.length]);
-    }
+  function goNextHero(e) {
+    e.preventDefault();
+    if (!heroCount) return;
+    setHeroIndex((x) => (x + 1) % heroCount);
+  }
 
-    return out;
-  }, [videos, videoOffset]);
+  function goToHero(idx, e) {
+    e.preventDefault();
+    setHeroIndex(idx);
+  }
 
-  const shownVideos = useMemo(() => {
-    if (!videos?.ok) return [];
-    if (shouldCycle) return cycledVideos;
-    return (videos.items || []).slice(0, 4);
-  }, [videos, shouldCycle, cycledVideos]);
+  const activeHero = useMemo(() => {
+    if (!heroVideos.length) return null;
+    return heroVideos[heroIndex % heroVideos.length];
+  }, [heroVideos, heroIndex]);
 
-  const pillForNews = (it) => {
-    return sport === "ALL" ? it.sport || "NEWS" : sport;
-  };
+  const visibleHeroDots = useMemo(() => {
+    return heroVideos.slice(0, Math.min(heroVideos.length, 8));
+  }, [heroVideos]);
 
   return (
     <div className="hub userHub">
       <nav className="topNav" aria-label="Top navigation">
         <Link to="/dashboard" className="brand">
-          <img className="brandIcon" src="/draftmindiq_head_transparent.png" alt="DraftMind" />
+          <img className="brandIcon2" src="/draftmindiq_head_transparent.png" alt="DraftMind" />
           <div className="brandText">
-            <span className="brandWord">DraftMindIQ</span>
+            <span className="brandWord">DraftMind</span>
             <span className="brandSub">User Dashboard</span>
           </div>
           <img className="brandIcon" src="/draftmindiq_iq_transparent.png" alt="IQ" />
@@ -289,17 +273,6 @@ export default function UserDashboard() {
               Settings
             </NavLink>
           </div>
-
-          <div className="navSport">
-            <div className="sportSelectLabel">Sport</div>
-            <select className="sportSelect" value={sport} onChange={(e) => setSport(e.target.value)}>
-              {SPORTS.map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         <div className="navRight">
@@ -312,86 +285,152 @@ export default function UserDashboard() {
         </div>
       </nav>
 
+      <section className="sportsBar" aria-label="Sports navigation">
+        <div className="sportsTabs">
+          {MAIN_SPORTS.map((key) => (
+            <Link key={key} to={DAILY_SLATE_NOTES[key]?.to || "#"} className="sportsTab">
+              {key}
+            </Link>
+          ))}
+
+          <div className="sportsMoreWrap" ref={moreRef}>
+            <button
+              type="button"
+              className="sportsTab sportsTabMore"
+              onClick={() => setMoreOpen((x) => !x)}
+              aria-expanded={moreOpen}
+              aria-label="More sports"
+            >
+              ...
+            </button>
+
+            {moreOpen && (
+              <div className="sportsMoreMenu">
+                {MORE_SPORTS.map((key) => (
+                  <Link
+                    key={key}
+                    to={DAILY_SLATE_NOTES[key]?.to || "#"}
+                    className="sportsMoreItem"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    {key}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       <header className="hubHeader compact">
         <div className="hubHeaderLeft">
           <div className="hubKicker">Welcome Back</div>
           <div className="hubH1">{firstName}'s Dashboard</div>
           <div className="hubMeta">
             <span className="hubMetaMuted">
-              Open the optimizer, follow your sport, and move fast from research to lineup build.
+              Scan the latest clips, check the prep notes, and jump straight into the optimizer when you are ready.
             </span>
           </div>
         </div>
       </header>
 
-      <section className="pulseRow" aria-label="User pulse">
-        {pulse.map((p) => (
-          <div key={p.label} className={`pulseCard tone-${p.tone}`}>
-            <div className="pulseLabel">{p.label}</div>
-            <div className="pulseValue">{p.value}</div>
-            <div className="pulseHint">{p.hint}</div>
-          </div>
-        ))}
-      </section>
-
       <div className="hubGrid">
         <div className="leftCol">
-          <Link to="/optimizer/mma" className="heroCard userHeroCard">
-            <div className="heroOverlay" aria-hidden="true" />
+          <a
+            href={activeHero?.url || "#"}
+            target={activeHero?.url ? "_blank" : undefined}
+            rel={activeHero?.url ? "noreferrer" : undefined}
+            className="heroCard userHeroCard videoHeroCard"
+            style={
+              getVideoThumb(activeHero)
+                ? {
+                    backgroundImage: `
+                      linear-gradient(180deg, rgba(5,10,20,0.18), rgba(5,10,20,0.78)),
+                      linear-gradient(135deg, rgba(79,70,229,0.22), rgba(34,197,94,0.14)),
+                      url("${getVideoThumb(activeHero)}")
+                    `,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : undefined
+            }
+          >
+            <div className="heroOverlay heroOverlayVideo" aria-hidden="true" />
+
             <div className="heroTop">
-              <div className="heroTag">Featured Workflow • MMA</div>
-              <div className="heroChip">READY</div>
+              <div className="heroTag">Featured Clips • All Sports</div>
+              <div className="heroChip">
+                {heroVideosLoading ? "LOADING" : activeHero?.sport || "LIVE"}
+              </div>
             </div>
 
-            <div className="heroTitle">Open the MMA Optimizer</div>
-            <div className="heroSub">
-              Build lineups from a cleaner, player-facing dashboard without admin controls or operational clutter.
+            <div className="heroMediaTopRow">
+              <div className="heroMediaMeta">
+                {activeHero ? getVideoMeta(activeHero) : "Recent sports clips will appear here"}
+              </div>
+
+              <div className="heroControls">
+                <button type="button" className="heroControlBtn" onClick={goPrevHero} aria-label="Previous clip">
+                  ‹
+                </button>
+                <button type="button" className="heroControlBtn" onClick={goNextHero} aria-label="Next clip">
+                  ›
+                </button>
+              </div>
             </div>
 
-            <div className="heroBullets">
-              <div className="heroBullet">
-                <span className="heroBulletDot" aria-hidden="true" />
-                <span>Open optimizer workflow fast</span>
+            <div className="heroVideoMeta">
+              <div className="heroVideoEyebrow">{activeHero?.sport || "ALL SPORTS"}</div>
+
+              <div className="heroTitle">
+                {activeHero?.title || "Recent cross-sport clips will rotate here."}
               </div>
-              <div className="heroBullet">
-                <span className="heroBulletDot" aria-hidden="true" />
-                <span>Review feeds, videos, and updates by sport</span>
-              </div>
-              <div className="heroBullet">
-                <span className="heroBulletDot" aria-hidden="true" />
-                <span>Keep focus on building, not admin maintenance</span>
+
+              <div className="heroSub">
+                {activeHero?.description ||
+                  activeHero?.source ||
+                  "Use the arrows to move through recent clips or open the one currently featured."}
               </div>
             </div>
 
             <div className="heroCtaRow">
-              <div className="heroCta">Start Building</div>
+              <div className="heroCta">Open Clip</div>
               <div className="heroCtaArrow" aria-hidden="true">
                 →
               </div>
             </div>
-          </Link>
 
-          <section className="userQuickGrid" aria-label="Quick actions">
-            {QUICK_ACTIONS.map((action) => (
-              <Link key={action.title} to={action.to} className="userQuickCard">
-                <div className="userQuickTitle">{action.title}</div>
-                <div className="userQuickDesc">{action.desc}</div>
-              </Link>
-            ))}
-          </section>
+            {!!visibleHeroDots.length && (
+              <div className="heroDots" aria-label="Clip selection">
+                {visibleHeroDots.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`heroDot ${idx === (heroIndex % visibleHeroDots.length) ? "active" : ""}`}
+                    onClick={(e) => goToHero(idx, e)}
+                    aria-label={`Go to clip ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </a>
 
-          <section className="moduleGrid" aria-label="User modules">
-            {visibleModules.map((m) => (
-              <div key={m.key} className={`moduleCard tone-${m.tone}`}>
+          <section className="moduleGrid" aria-label="Upcoming slate prep notes">
+            {sportCards.map((m) => (
+              <div key={m.key} className="moduleCard slateNoteCard">
                 <div className="moduleTop">
-                  <div className="moduleTitle">{m.title}</div>
-                  <div className={`modulePill status-${m.status.toLowerCase()}`}>{m.status}</div>
+                  <div>
+                    <div className="slateLabel">{m.slate}</div>
+                    <div className="moduleTitle">{m.key}</div>
+                  </div>
+
+                  <div className="modulePill status-soon">{m.status}</div>
                 </div>
 
-                <div className="moduleDesc">{m.desc}</div>
+                <div className="moduleDesc">{m.summary}</div>
 
                 <div className="moduleList">
-                  {m.highlights.map((x) => (
+                  {m.angles.map((x) => (
                     <div key={x} className="moduleItem">
                       <span className="moduleDot" aria-hidden="true" />
                       <span>{x}</span>
@@ -401,76 +440,22 @@ export default function UserDashboard() {
 
                 <div className="moduleActions">
                   <Link to={m.to} className="moduleBtn">
-                    Open <span aria-hidden="true">→</span>
+                    Open Optimizer <span aria-hidden="true">→</span>
                   </Link>
-                  <div className="moduleHint">Module: {m.key}</div>
+                  <div className="moduleHint">{m.updatedAt}</div>
                 </div>
               </div>
             ))}
           </section>
-
-          <section className="blockGrid" aria-label="User blocks">
-            <div className="blockCard userBlock">
-              <div className="blockHeader">My Workflow</div>
-              <div className="blockBody">
-                Start with the optimizer, review current slate context, and export when your build is ready.
-              </div>
-              <div className="blockFooter">
-                <span className="pill">OPTIMIZER</span>
-                <span className="pill">SLATES</span>
-                <span className="pill">EXPORTS</span>
-              </div>
-            </div>
-
-            <div className="blockCard userBlock">
-              <div className="blockHeader">News & Research</div>
-              <div className="blockBody">
-                Headlines, videos, and slate notes stay visible here without mixing in backend system status.
-              </div>
-              <div className="blockFooter">
-                <span className="pill">NEWS</span>
-                <span className="pill">VIDEOS</span>
-                <span className="pill">NOTES</span>
-              </div>
-            </div>
-
-            <div className="blockCard userBlock">
-              <div className="blockHeader">Defaults</div>
-              <div className="blockBody">
-                Favorite sport: {settings.favoriteSport || "ALL"} • Timezone: {settings.timezone} • Notifications: ON
-              </div>
-              <div className="blockFooter">
-                <span className="pill">SETTINGS</span>
-                <span className="pill">TIMEZONE</span>
-                <span className="pill">PREFERENCES</span>
-              </div>
-            </div>
-
-            <div className="blockCard userBlock">
-              <div className="blockHeader">Coming Soon</div>
-              <div className="blockBody">
-                Saved builds, historical comparison, and per-lineup notes can expand here once the optimizer flow is finalized.
-              </div>
-              <div className="blockFooter">
-                <span className="pill">SAVES</span>
-                <span className="pill">COMPARE</span>
-                <span className="pill">NOTES</span>
-              </div>
-            </div>
-          </section>
         </div>
 
-        <aside className="rightCol" aria-label="Right rail">
-          <div className="railHeader">
-            <div className="railTitle">Live Feed</div>
-            <div className="railHint">{railHint}</div>
-          </div>
-
+        <aside className="rightCol" aria-label="Critical headlines across all sports">
           <div className="railStack">
             {news.ok && news.items && news.items.length > 0 ? (
-              news.items.slice(0, 6).map((it) => {
+              news.items.slice(0, 8).map((it) => {
                 const published = formatPublished(it.published_at);
-                const sub = published || it.source || "News";
+                const sub = published || it.source || "Update";
+
                 return (
                   <a
                     key={it.url}
@@ -482,49 +467,25 @@ export default function UserDashboard() {
                   >
                     <div className="newsTop">
                       <div className="newsTitle">{it.title}</div>
-                      <div className="newsPill">{pillForNews(it)}</div>
+                      <div className="newsPill">{it.sport || "NEWS"}</div>
                     </div>
                     <div className="newsSub">{sub}</div>
                   </a>
                 );
               })
             ) : (
-              <>
-                <div className="newsCard">
-                  <div className="newsTop">
-                    <div className="newsTitle">Feed Loading</div>
-                    <div className="newsPill">LIVE</div>
+              <div className="newsCard">
+                <div className="newsTop">
+                  <div className="newsTitle">
+                    {newsLoading ? "Loading headlines" : "Critical headlines will appear here"}
                   </div>
-                  <div className="newsSub">News and video content will appear here.</div>
+                  <div className="newsPill">ALL</div>
                 </div>
-              </>
+                <div className="newsSub">
+                  The right rail stays focused on important cross-sport headlines and updates.
+                </div>
+              </div>
             )}
-          </div>
-
-          <div className="railCTA">
-            <div className="railCTATitle">Latest Videos</div>
-            <div className="railCTASub">
-              {shouldCycle ? "Auto-cycling across sports." : "Latest updates for the selected sport."}
-            </div>
-
-            <div className="toolLinks">
-              {shownVideos && shownVideos.length > 0 ? (
-                shownVideos.map((v) => (
-                  <a key={v.url} href={v.url} target="_blank" rel="noreferrer">
-                    {v.title}
-                  </a>
-                ))
-              ) : (
-                <>
-                  <a href="https://www.youtube.com/@ufc" target="_blank" rel="noreferrer">
-                    UFC Channel
-                  </a>
-                  <a href="https://www.youtube.com/@NFL" target="_blank" rel="noreferrer">
-                    NFL Channel
-                  </a>
-                </>
-              )}
-            </div>
           </div>
         </aside>
       </div>
